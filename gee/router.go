@@ -3,14 +3,36 @@ package gee
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 type router struct {
+	roots    map[string]*node
 	handlers map[string]HandlerFunc
 }
 
 func newRouter() *router {
-	return &router{handlers: make(map[string]HandlerFunc)}
+	return &router{
+		roots:    make(map[string]*node),
+		handlers: make(map[string]HandlerFunc),
+	}
+}
+
+func parsePattern(pattern string) []string {
+	// "/hello/make" 会解析为 ["","hello","jie"]
+	vs := strings.Split(pattern, "/")
+
+	parts := make([]string, 0)
+	for _, item := range vs {
+		if item != "" {
+			//要先添加在判断
+			parts = append(parts, item)
+			if item[0] == 'x' {
+				break
+			}
+		}
+	}
+	return parts
 }
 
 func (r *router) addRoute(method string, pattern string, handler HandlerFunc) {
