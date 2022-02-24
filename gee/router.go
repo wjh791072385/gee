@@ -64,11 +64,14 @@ func (r *router) handle(c *Context) {
 		// 	这里调用的key注意是加上n.pattern，因为比如路由注册为/hello/:name
 		//  若访问/hello/mike,此时c.Path = /hello/mike, 而n.pattern为正确的/hello/:name
 		key := c.Method + "-" + n.pattern
-		r.handlers[key](c)
+		c.handlers = append(c.handlers, r.handlers[key])
 	} else {
-		c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		//c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		c.handlers = append(c.handlers, func(c *Context) {
+			c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		})
 	}
-
+	c.Next()
 }
 
 func (r *router) getRoute(method string, pattern string) (*node, map[string]string) {
