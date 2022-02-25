@@ -2,6 +2,7 @@ package gee
 
 import (
 	"net/http"
+	"path"
 	"strings"
 )
 
@@ -29,6 +30,7 @@ func New() *Engine {
 	return engine
 }
 
+// Group part
 func (group *RouterGroup) Group(prefix string) *RouterGroup {
 	//all groups share the same Engine instance !
 	engine := group.engine
@@ -41,10 +43,35 @@ func (group *RouterGroup) Group(prefix string) *RouterGroup {
 	return newGroup
 }
 
+// Use middleware part
 func (group *RouterGroup) Use(middlewares ...HandlerFunc) {
 	group.middlewares = append(group.middlewares, middlewares...)
 }
 
+// Static part
+func (group *RouterGroup) createStaticHandler(relativePath string, fs http.FileSystem) HandlerFunc {
+	absolutePath := path.Join(relativePath, group.prefix)
+	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
+	return func(c *Context) {
+		file := c.Param("filepath")
+		if _, err := fs.Open(file); err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		fileServer.ServeHTTP(c.Writer, c.Req)
+	}
+}
+
+func (group *RouterGroup) Static(relativePath string, root string) {
+	// 使用http.Dir是因为Dir实现了http.FileSystem接口
+	handler := group.createStaticHandler(relativePath, http.Dir(root))
+	urlPattern := path.Join(relativePath, "/*filepath")
+	// Register GET handlers
+	group.GET(urlPattern, handler)
+}
+
+// addRoute router part
 func (group *RouterGroup) addRoute(method string, pattern string, handler HandlerFunc) {
 	//路由是分组前缀 + 后缀
 	newPattern := group.prefix + pattern

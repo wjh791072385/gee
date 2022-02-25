@@ -25,6 +25,9 @@ func GroupMid() gee.HandlerFunc {
 func main() {
 	r := gee.New()
 
+	//加载静态资源,访问localhost:8888/assets/file1.txt相当于访问./resource/file1.txt
+	r.Static("/assets", "./resource")
+
 	//定义全局中间件
 	r.Use(Logger())
 
@@ -32,6 +35,7 @@ func main() {
 		c.HTML(http.StatusOK, "<h1>This is Gee</h1>")
 	})
 
+	//定义组内中间件
 	v1 := r.Group("/v1")
 	v1.Use(GroupMid())
 	{
