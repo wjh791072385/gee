@@ -1,4 +1,4 @@
-package goWebGee
+package gee
 
 import (
 	"log"

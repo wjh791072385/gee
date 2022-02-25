@@ -1,3 +1,3 @@
-module github.com/wjh791072385/goWebGee
+module github.com/wjh791072385/gee
 
 go 1.17
