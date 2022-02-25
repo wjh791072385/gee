@@ -4,16 +4,7 @@ import (
 	"goWebGee/gee"
 	"log"
 	"net/http"
-	"time"
 )
-
-func Logger() gee.HandlerFunc {
-	return func(c *gee.Context) {
-		t := time.Now()
-		c.Next()
-		log.Printf("[%d] %s in %v", c.StatusCode, c.Req.RequestURI, time.Since(t))
-	}
-}
 
 func GroupMid() gee.HandlerFunc {
 	return func(c *gee.Context) {
@@ -23,14 +14,13 @@ func GroupMid() gee.HandlerFunc {
 }
 
 func main() {
-	r := gee.New()
+	//r := gee.New()
+	// Default方法默认使用Logger和Recovery中间件
+	r := gee.Default()
 
 	//加载静态资源,访问localhost:8888/assets/file1.txt相当于访问./resource/file1.txt
 	r.Static("/assets", "./resource")
 	r.LoadHTMLGlob("templates/*")
-
-	//定义全局中间件
-	r.Use(Logger())
 
 	r.GET("/", func(c *gee.Context) {
 		c.String(http.StatusOK, "<h1>This is Gee</h1>")
@@ -71,7 +61,8 @@ func main() {
 
 	r.GET("/getHtml", func(c *gee.Context) {
 		c.HTML(http.StatusOK, "tes.tmpl", gee.H{
-			"msg": "this is a template",
+			"msg":    "this is a template",
+			"status": "ok",
 		})
 	})
 
