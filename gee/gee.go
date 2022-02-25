@@ -1,6 +1,7 @@
 package gee
 
 import (
+	"html/template"
 	"net/http"
 	"path"
 	"strings"
@@ -10,9 +11,11 @@ type HandlerFunc func(*Context)
 
 // Engine implements the interface of ServeHTTP
 type Engine struct {
-	*RouterGroup //方便Engine作为最顶层的设计，可以调用RouterGroup的方法
-	router       *router
-	groups       []*RouterGroup // store all groups
+	*RouterGroup  //方便Engine作为最顶层的设计，可以调用RouterGroup的方法
+	router        *router
+	groups        []*RouterGroup // store all groups
+	htmlTemplates *template.Template
+	funcMap       template.FuncMap
 }
 
 type RouterGroup struct {
@@ -28,6 +31,14 @@ func New() *Engine {
 	engine.RouterGroup = &RouterGroup{engine: engine}
 	engine.groups = []*RouterGroup{engine.RouterGroup}
 	return engine
+}
+
+func (engine *Engine) setFuncMap(funcMap template.FuncMap) {
+	engine.funcMap = funcMap
+}
+
+func (engine *Engine) LoadHTMLGlob(pattern string) {
+	engine.htmlTemplates = template.Must(template.New("").Funcs(engine.funcMap).ParseGlob(pattern))
 }
 
 // Group part
@@ -93,7 +104,6 @@ func (engine *Engine) Run(addr string) error {
 }
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-
 	var middlewares []HandlerFunc
 	for _, group := range engine.groups {
 		if strings.HasPrefix(req.URL.Path, group.prefix) {
@@ -101,6 +111,8 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	c := newContext(w, req)
+	//所有context共享一个engine
+	c.engine = engine
 	c.handlers = middlewares
 	engine.router.handle(c)
 }

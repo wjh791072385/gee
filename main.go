@@ -27,12 +27,13 @@ func main() {
 
 	//加载静态资源,访问localhost:8888/assets/file1.txt相当于访问./resource/file1.txt
 	r.Static("/assets", "./resource")
+	r.LoadHTMLGlob("templates/*")
 
 	//定义全局中间件
 	r.Use(Logger())
 
 	r.GET("/", func(c *gee.Context) {
-		c.HTML(http.StatusOK, "<h1>This is Gee</h1>")
+		c.String(http.StatusOK, "<h1>This is Gee</h1>")
 	})
 
 	//定义组内中间件
@@ -40,7 +41,7 @@ func main() {
 	v1.Use(GroupMid())
 	{
 		v1.GET("/", func(c *gee.Context) {
-			c.HTML(http.StatusOK, "<h1>This is Gee Group</h1>")
+			c.String(http.StatusOK, "<h1>This is Gee Group</h1>")
 		})
 		v1.GET("/hello", func(c *gee.Context) {
 			c.JSON(http.StatusOK, gee.H{
@@ -65,6 +66,12 @@ func main() {
 		c.JSON(http.StatusOK, gee.H{
 			"username": c.PostForm("username"),
 			"password": c.PostForm("password"),
+		})
+	})
+
+	r.GET("/getHtml", func(c *gee.Context) {
+		c.HTML(http.StatusOK, "tes.tmpl", gee.H{
+			"msg": "this is a template",
 		})
 	})
 
