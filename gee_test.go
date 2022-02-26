@@ -8,8 +8,9 @@ import (
 
 func GroupMid() HandlerFunc {
 	return func(c *Context) {
-		log.Println("group middleware")
+		log.Println("before group middleware")
 		c.Next()
+		log.Println("after group middleware")
 	}
 }
 

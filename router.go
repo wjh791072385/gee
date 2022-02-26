@@ -7,7 +7,7 @@ import (
 )
 
 type router struct {
-	roots    map[string]*node // 每个请求方法对应一个前缀树 "GET" "PUT"
+	roots    map[string]*node // 每个请求方法对应一个前缀树 "GET" "PUT" "POST"
 	handlers map[string]HandlerFunc
 }
 

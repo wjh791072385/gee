@@ -106,6 +106,14 @@ func (group *RouterGroup) POST(pattern string, handler HandlerFunc) {
 	group.addRoute("POST", pattern, handler)
 }
 
+func (group *RouterGroup) PUT(pattern string, handler HandlerFunc) {
+	group.addRoute("PUT", pattern, handler)
+}
+
+func (group *RouterGroup) DELETE(pattern string, handler HandlerFunc) {
+	group.addRoute("DELETE", pattern, handler)
+}
+
 func (engine *Engine) Run(addr string) error {
 	return http.ListenAndServe(addr, engine)
 }
