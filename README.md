@@ -12,8 +12,9 @@
 
 ## Installation
 ***
-go get -u github.com/wjh791072385/gee
-
+```
+$ go get -u github.com/wjh791072385/gee
+```
 
 ## Quick start
 ***
